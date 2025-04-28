@@ -1,5 +1,5 @@
 prometheus.relabel "filter_metrics" {
-	forward_to = [prometheus.remote_write.default.receiver]
+	forward_to = [prometheus.remote_write.default.receiver,prometheus.remote_write.selfhosted.receiver]
 
 	// Drop metrics you don't want
 	rule {
@@ -63,6 +63,24 @@ prometheus.scrape "bull_queue_monitor" {
 	metrics_path    = "/metrics"
 }
 
+otelcol.receiver.otlp "default" {
+  grpc {
+    endpoint = "0.0.0.0:4317"
+  }
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+  forward_to = [tempo.receiver.otlp.default.receiver]
+}
+
+tempo.receiver.otlp "default" {
+  endpoint {
+    url = sys.env("TEMPO_INTERNAL_URL") + "/v1/traces"
+  }
+}
+
+
+
 prometheus.remote_write "default" {
 	external_labels = {
 		monitor = "railway-prom",
@@ -91,5 +109,27 @@ loki.write "grafanacloud" {
       username = "981018"
       password = "glc_eyJvIjoiMTIwNzk5MSIsIm4iOiJzdGFjay0xMDIzMjM4LWhtLXdyaXRlLXByb21ldGhldXNfZ2l0aHViIiwiayI6IjkzUHQ3QXowSDkydDk0eDloYzZNcnVaTyIsIm0iOnsiciI6InByb2QtdXMtZWFzdC0wIn19"
     }
+  }
+}
+
+
+
+prometheus.remote_write "selfhosted" {
+	external_labels = {
+		monitor = "railway-prom",
+	}
+
+	endpoint {
+		url = sys.env("PROMETHEUS_INTERNAL_URL") + "/api/v1/write"
+
+		queue_config { }
+
+		metadata_config { }
+	}
+}
+
+loki.write "selfhosted" {
+  endpoint {
+    url = sys.env("LOKI_INTERNAL_URL") + "api/v1/push"
   }
 }
