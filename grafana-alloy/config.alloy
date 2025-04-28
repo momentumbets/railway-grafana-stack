@@ -142,3 +142,4 @@ loki.write "selfhosted" {
         url = sys.env("LOKI_INTERNAL_URL") + "api/v1/push"
     }
 }
+
