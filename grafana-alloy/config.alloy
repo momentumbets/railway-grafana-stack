@@ -91,7 +91,7 @@ prometheus.remote_write "default" {
 
 		basic_auth {
 			username = "1763099"
-			password = "glc_eyJvIjoiMTIwNzk5MSIsIm4iOiJzdGFjay0xMDIzMjM4LWhtLXdyaXRlLXByb21ldGhldXNfZ2l0aHViIiwiayI6IjkzUHQ3QXowSDkydDk0eDloYzZNcnVaTyIsIm0iOnsiciI6InByb2QtdXMtZWFzdC0wIn19"
+			password = sys.env("GRAFANA_CLOUD_PW")
 		}
 
 		queue_config { }
@@ -107,7 +107,7 @@ loki.write "grafanacloud" {
 
     basic_auth {
       username = "981018"
-      password = "glc_eyJvIjoiMTIwNzk5MSIsIm4iOiJzdGFjay0xMDIzMjM4LWhtLXdyaXRlLXByb21ldGhldXNfZ2l0aHViIiwiayI6IjkzUHQ3QXowSDkydDk0eDloYzZNcnVaTyIsIm0iOnsiciI6InByb2QtdXMtZWFzdC0wIn19"
+      password = sys.env("GRAFANA_CLOUD_PW")
     }
   }
 }
