@@ -128,8 +128,17 @@ prometheus.remote_write "selfhosted" {
 	}
 }
 
+loki.source.api "listener" {
+    http {
+        listen_address = "0.0.0.0"
+        listen_port    = 3100
+    }
+    labels = { "source" = "api" }
+    forward_to = [loki.write.selfhosted.receiver]
+}
+
 loki.write "selfhosted" {
-  endpoint {
-    url = sys.env("LOKI_INTERNAL_URL") + "api/v1/push"
-  }
+    endpoint {
+        url = sys.env("LOKI_INTERNAL_URL") + "api/v1/push"
+    }
 }
