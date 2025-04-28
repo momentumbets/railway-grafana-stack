@@ -1,0 +1,12 @@
+FROM grafana/alloy:latest
+
+# copy the alloy configuration file
+COPY config.alloy /etc/alloy/config.alloy
+
+# expose the alloy server port
+EXPOSE 12345
+
+# set the entrypoint command
+CMD        [ "run", "--server.http.listen-addr=0.0.0.0:12345", \
+             "--storage.path=/var/lib/alloy/data", \
+             "/etc/alloy/config.alloy"]

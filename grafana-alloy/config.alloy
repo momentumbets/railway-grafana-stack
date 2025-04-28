@@ -1,0 +1,95 @@
+prometheus.relabel "filter_metrics" {
+	forward_to = [prometheus.remote_write.default.receiver]
+
+	// Drop metrics you don't want
+	rule {
+		source_labels = ["__name__"]
+		regex         = "(criteria_eval_related_rec_.*)"
+		action        = "drop"
+	}
+}
+
+prometheus.scrape "prometheus" {
+	targets = [{
+		__address__ = "localhost:9090",
+	}]
+	forward_to      = [prometheus.relabel.filter_metrics.receiver]
+	job_name        = "prometheus"
+	scrape_interval = "60s"
+	scrape_timeout  = "60s"
+}
+
+prometheus.scrape "server" {
+	targets = [{
+		__address__ = "mb-stack.railway.internal:3001",
+	}]
+	forward_to      = [prometheus.relabel.filter_metrics.receiver]
+	job_name        = "server"
+	scrape_interval = "60s"
+	scrape_timeout  = "60s"
+	metrics_path    = "/v1/metrics"
+}
+
+prometheus.scrape "queues" {
+	targets = [{
+		__address__ = "mb-stack.railway.internal:3001",
+	}]
+	forward_to      = [prometheus.relabel.filter_metrics.receiver]
+	job_name        = "queues"
+	scrape_interval = "60s"
+	scrape_timeout  = "60s"
+	metrics_path    = "/v1/queues/metrics"
+}
+
+prometheus.scrape "criteria_evaluator" {
+	targets = [{
+		__address__ = "criteria-evaluator.railway.internal:3003",
+	}]
+	forward_to      = [prometheus.relabel.filter_metrics.receiver]
+	job_name        = "criteria-evaluator"
+	scrape_interval = "60s"
+	scrape_timeout  = "60s"
+	metrics_path    = "/v1/metrics"
+}
+
+prometheus.scrape "bull_queue_monitor" {
+	targets = [{
+		__address__ = "bull-queue-monitor.railway.internal:3000",
+	}]
+	forward_to      = [prometheus.relabel.filter_metrics.receiver]
+	job_name        = "bull-queues"
+	scrape_interval = "60s"
+	scrape_timeout  = "60s"
+	metrics_path    = "/metrics"
+}
+
+prometheus.remote_write "default" {
+	external_labels = {
+		monitor = "railway-prom",
+	}
+
+	endpoint {
+		url = "https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom/push"
+
+		basic_auth {
+			username = "1763099"
+			password = "glc_eyJvIjoiMTIwNzk5MSIsIm4iOiJzdGFjay0xMDIzMjM4LWhtLXdyaXRlLXByb21ldGhldXNfZ2l0aHViIiwiayI6IjkzUHQ3QXowSDkydDk0eDloYzZNcnVaTyIsIm0iOnsiciI6InByb2QtdXMtZWFzdC0wIn19"
+		}
+
+		queue_config { }
+
+		metadata_config { }
+	}
+}
+
+
+loki.write "grafanacloud" {
+  endpoint {
+    url = "https://logs-prod-006.grafana.net/loki/api/v1/push"
+
+    basic_auth {
+      username = "981018"
+      password = "glc_eyJvIjoiMTIwNzk5MSIsIm4iOiJzdGFjay0xMDIzMjM4LWhtLXdyaXRlLXByb21ldGhldXNfZ2l0aHViIiwiayI6IjkzUHQ3QXowSDkydDk0eDloYzZNcnVaTyIsIm0iOnsiciI6InByb2QtdXMtZWFzdC0wIn19"
+    }
+  }
+}
