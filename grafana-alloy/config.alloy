@@ -1,8 +1,3 @@
-tempo.receiver.otlp "default" {
-  endpoint {
-    url = sys.env("TEMPO_INTERNAL_URL") + "/v1/traces"
-  }
-}
 
 otelcol.receiver.otlp "default" {
   grpc {
@@ -22,7 +17,13 @@ otelcol.processor.batch "all_signals" {
   output {
     metrics = [otelcol.exporter.prometheus.otlp_metrics_out.input]
     logs    = [otelcol.exporter.loki.otlp_logs_out.input]
-    traces  = [tempo.receiver.otlp.default]
+    traces  = [otelcol.exporter.otlp.default.input]
+  }
+}
+
+otelcol.exporter.otlp "default" {
+  endpoint {
+    url = sys.env("TEMPO_INTERNAL_URL") + "/v1/traces"
   }
 }
 
