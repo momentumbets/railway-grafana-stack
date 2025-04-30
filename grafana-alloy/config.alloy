@@ -52,7 +52,7 @@ otelcol.exporter.loki "otlp_logs_out" {
 
 loki.write "otlp_logs" {
   endpoint {
-    url = sys.env("LOKI_INTERNAL_URL") + "api/v1/push"
+    url = sys.env("LOKI_INTERNAL_URL") + "/api/v1/push"
   }
 }
 
