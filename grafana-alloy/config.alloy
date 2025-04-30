@@ -1,5 +1,63 @@
+otelcol.receiver.otlp "default" {
+  grpc {
+    endpoint = "0.0.0.0:4317"
+  }
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+  output {
+    metrics = [otelcol.processor.batch.all_signals.input]
+    logs    = [otelcol.processor.batch.all_signals.input]
+    traces  = [otelcol.processor.batch.all_signals.input]
+  }
+}
+
+otelcol.processor.batch "all_signals" {
+  output {
+    metrics = [otelcol.exporter.prometheus.otlp_metrics_out.input]
+    logs    = [otelcol.exporter.loki.otlp_logs_out.input]
+    traces  = [tempo.receiver.otlp.default]
+  }
+}
+
+otelcol.exporter.prometheus "otlp_metrics_out" {
+  forward_to = [prometheus.remote_write.otlp_metrics.receiver]
+}
+
+prometheus.remote_write "otlp_metrics" {
+	external_labels = {
+		monitor = "railway-prom-otlp",
+		source    = "otelcol",
+	}
+
+	endpoint {
+		url = sys.env("PROMETHEUS_INTERNAL_URL") + "/api/v1/write"
+
+		queue_config { }
+
+		metadata_config { }
+	}
+}
+
+otelcol.exporter.loki "otlp_logs_out" {
+  forward_to = [loki.write.otlp_logs.receiver]
+}
+
+loki.write "otlp_logs" {
+  endpoint {
+    url = sys.env("LOKI_INTERNAL_URL") + "api/v1/push"
+  }
+}
+
+tempo.receiver.otlp "default" {
+  endpoint {
+    url = sys.env("TEMPO_INTERNAL_URL") + "/v1/traces"
+  }
+}
+
+// Existing Prometheus and Loki configurations remain as they are
 prometheus.relabel "filter_metrics" {
-	forward_to = [prometheus.remote_write.default.receiver,prometheus.remote_write.selfhosted.receiver]
+	forward_to = [prometheus.remote_write.default.receiver,prometheus.remote_write.selfhosted.receiver, prometheus.remote_write.otlp_metrics.receiver]
 
 	// Drop metrics you don't want
 	rule {
@@ -61,22 +119,6 @@ prometheus.scrape "bull_queue_monitor" {
 	scrape_interval = "60s"
 	scrape_timeout  = "60s"
 	metrics_path    = "/metrics"
-}
-
-tempo.receiver.otlp "default" {
-  endpoint {
-    url = sys.env("TEMPO_INTERNAL_URL") + "/v1/traces"
-  }
-}
-
-otelcol.receiver.otlp "default" {
-  grpc {
-    endpoint = "0.0.0.0:4317"
-  }
-  http {
-    endpoint = "0.0.0.0:4318"
-  }
-  forward_to = [tempo.receiver.otlp.default]
 }
 
 prometheus.remote_write "default" {
