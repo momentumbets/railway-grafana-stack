@@ -63,6 +63,12 @@ prometheus.scrape "bull_queue_monitor" {
 	metrics_path    = "/metrics"
 }
 
+tempo.receiver.otlp "default" {
+  endpoint {
+    url = sys.env("TEMPO_INTERNAL_URL") + "/v1/traces"
+  }
+}
+
 otelcol.receiver.otlp "default" {
   grpc {
     endpoint = "0.0.0.0:4317"
@@ -70,16 +76,8 @@ otelcol.receiver.otlp "default" {
   http {
     endpoint = "0.0.0.0:4318"
   }
-  forward_to = [tempo.receiver.otlp.default.receiver]
+  forward_to = [tempo.receiver.otlp.default]
 }
-
-tempo.receiver.otlp "default" {
-  endpoint {
-    url = sys.env("TEMPO_INTERNAL_URL") + "/v1/traces"
-  }
-}
-
-
 
 prometheus.remote_write "default" {
 	external_labels = {
@@ -142,4 +140,3 @@ loki.write "selfhosted" {
         url = sys.env("LOKI_INTERNAL_URL") + "api/v1/push"
     }
 }
-
