@@ -1,3 +1,9 @@
+tempo.receiver.otlp "default" {
+  endpoint {
+    url = sys.env("TEMPO_INTERNAL_URL") + "/v1/traces"
+  }
+}
+
 otelcol.receiver.otlp "default" {
   grpc {
     endpoint = "0.0.0.0:4317"
@@ -46,12 +52,6 @@ otelcol.exporter.loki "otlp_logs_out" {
 loki.write "otlp_logs" {
   endpoint {
     url = sys.env("LOKI_INTERNAL_URL") + "api/v1/push"
-  }
-}
-
-tempo.receiver.otlp "default" {
-  endpoint {
-    url = sys.env("TEMPO_INTERNAL_URL") + "/v1/traces"
   }
 }
 
