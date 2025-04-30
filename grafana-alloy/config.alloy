@@ -32,14 +32,9 @@ otelcol.exporter.prometheus "otlp_metrics_out" {
 }
 
 otelcol.exporter.loki "otlp_logs_out" {
-  forward_to = [loki.write.otlp_logs.receiver]
+  forward_to = [loki.write.selfhosted.receiver, loki.write.grafanacloud.receiver]
 }
 
-loki.write "otlp_logs" {
-  endpoint {
-    url = sys.env("LOKI_INTERNAL_URL") + "/api/v1/push"
-  }
-}
 
 // Existing Prometheus and Loki configurations remain as they are
 prometheus.relabel "filter_metrics" {
@@ -126,6 +121,15 @@ prometheus.remote_write "default" {
 	}
 }
 
+loki.source.api "listener" {
+    http {
+        listen_address = "0.0.0.0"
+        listen_port    = 3100
+    }
+    labels = { "source" = "api" }
+    forward_to = [loki.write.selfhosted.receiver, loki.write.grafanacloud.receiver]
+}
+
 
 loki.write "grafanacloud" {
   endpoint {
@@ -138,6 +142,11 @@ loki.write "grafanacloud" {
   }
 }
 
+loki.write "selfhosted" {
+    endpoint {
+        url = sys.env("LOKI_INTERNAL_URL") + "/api/v1/push"
+    }
+}
 
 
 prometheus.remote_write "selfhosted" {
@@ -154,17 +163,3 @@ prometheus.remote_write "selfhosted" {
 	}
 }
 
-loki.source.api "listener" {
-    http {
-        listen_address = "0.0.0.0"
-        listen_port    = 3100
-    }
-    labels = { "source" = "api" }
-    forward_to = [loki.write.selfhosted.receiver]
-}
-
-loki.write "selfhosted" {
-    endpoint {
-        url = sys.env("LOKI_INTERNAL_URL") + "/api/v1/push"
-    }
-}
