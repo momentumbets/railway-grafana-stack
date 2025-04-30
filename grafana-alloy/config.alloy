@@ -28,22 +28,7 @@ otelcol.exporter.otlp "default" {
 }
 
 otelcol.exporter.prometheus "otlp_metrics_out" {
-  forward_to = [prometheus.remote_write.otlp_metrics.receiver]
-}
-
-prometheus.remote_write "otlp_metrics" {
-	external_labels = {
-		monitor = "railway-prom-otlp",
-		source    = "otelcol",
-	}
-
-	endpoint {
-		url = sys.env("PROMETHEUS_INTERNAL_URL") + "/api/v1/write"
-
-		queue_config { }
-
-		metadata_config { }
-	}
+  forward_to = [prometheus.relabel.filter_metrics.receiver]
 }
 
 otelcol.exporter.loki "otlp_logs_out" {
@@ -58,7 +43,7 @@ loki.write "otlp_logs" {
 
 // Existing Prometheus and Loki configurations remain as they are
 prometheus.relabel "filter_metrics" {
-	forward_to = [prometheus.remote_write.default.receiver,prometheus.remote_write.selfhosted.receiver, prometheus.remote_write.otlp_metrics.receiver]
+	forward_to = [prometheus.remote_write.default.receiver,prometheus.remote_write.selfhosted.receiver]
 
 	// Drop metrics you don't want
 	rule {
