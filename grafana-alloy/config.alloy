@@ -22,8 +22,8 @@ otelcol.processor.batch "all_signals" {
 }
 
 otelcol.exporter.otlp "default" {
-  endpoint {
-    url = sys.env("TEMPO_INTERNAL_URL") + "/v1/traces"
+  client {
+    endpoint = sys.env("TEMPO_INTERNAL_URL") + "/v1/traces"
   }
 }
 
