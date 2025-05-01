@@ -12,13 +12,6 @@ common:
   replication_factor: 1
   path_prefix: /loki
 
-limits_config:
-  # TODO: address large logs and then reduce this again
-  max_line_size: 3145728
-
-pattern_ingester:
-  enabled: true
-
 schema_config:
   configs:
     - from: 2025-01-01
@@ -33,3 +26,12 @@ storage_config:
   tsdb_shipper:
     active_index_directory: /loki/tsdb-index
     cache_location: /loki/tsdb-cache
+
+limits_config:
+  volume_enabled: true
+
+  # TODO: address large logs and then reduce this again
+  max_line_size: 3145728
+
+pattern_ingester:
+  enabled: true
