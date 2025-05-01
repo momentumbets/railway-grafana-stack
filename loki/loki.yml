@@ -16,6 +16,9 @@ limits_config:
   # TODO: address large logs and then reduce this again
   max_line_size: 3145728
 
+pattern_ingester:
+  enabled: true
+
 schema_config:
   configs:
     - from: 2025-01-01
