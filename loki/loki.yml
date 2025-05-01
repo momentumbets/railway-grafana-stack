@@ -12,15 +12,19 @@ common:
   replication_factor: 1
   path_prefix: /loki
 
+limits_config:
+  # TODO: address large logs and then reduce this again
+  max_line_size: 3145728
+
 schema_config:
   configs:
-  - from: 2025-01-01
-    index:
-      period: 24h
-      prefix: index_
-    store: tsdb
-    object_store: filesystem
-    schema: v13
+    - from: 2025-01-01
+      index:
+        period: 24h
+        prefix: index_
+      store: tsdb
+      object_store: filesystem
+      schema: v13
 
 storage_config:
   tsdb_shipper:
