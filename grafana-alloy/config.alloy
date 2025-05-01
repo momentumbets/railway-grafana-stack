@@ -178,7 +178,7 @@ loki.write "grafanacloud" {
 
 loki.write "selfhosted" {
     endpoint {
-        url = sys.env("LOKI_INTERNAL_URL") + "/api/v1/push"
+        url = sys.env("LOKI_INTERNAL_URL") + "/loki/api/v1/push"
     }
 }
 
