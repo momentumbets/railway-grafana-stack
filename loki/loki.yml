@@ -29,6 +29,8 @@ storage_config:
 
 limits_config:
   volume_enabled: true
+  ingestion_rate_mb: 8
+  ingestion_burst_size_mb: 16
 
   # TODO: address large logs and then reduce this again
   max_line_size: 3145728
