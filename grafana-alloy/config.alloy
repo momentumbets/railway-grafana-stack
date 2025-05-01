@@ -38,7 +38,7 @@ otelcol.exporter.loki "otlp_logs_out" {
 
 // Existing Prometheus and Loki configurations remain as they are
 prometheus.relabel "filter_metrics" {
-	forward_to = [prometheus.remote_write.default.receiver,prometheus.remote_write.selfhosted.receiver]
+	forward_to = [prometheus.remote_write.default.receiver]
 
 	// Drop metrics you don't want
 	rule {
@@ -60,7 +60,7 @@ prometheus.scrape "prometheus" {
 
 prometheus.scrape "server" {
 	targets = [{
-		__address__ = "mb-stack.railway.internal:3001",
+		__address__ = "server.railway.internal:3001",
 	}]
 	forward_to      = [prometheus.relabel.filter_metrics.receiver]
 	job_name        = "server"
@@ -71,7 +71,7 @@ prometheus.scrape "server" {
 
 prometheus.scrape "queues" {
 	targets = [{
-		__address__ = "mb-stack.railway.internal:3001",
+		__address__ = "server.railway.internal:3001",
 	}]
 	forward_to      = [prometheus.relabel.filter_metrics.receiver]
 	job_name        = "queues"
@@ -90,6 +90,40 @@ prometheus.scrape "criteria_evaluator" {
 	scrape_timeout  = "60s"
 	metrics_path    = "/v1/metrics"
 }
+
+prometheus.scrape "sports-scanner" {
+	targets = [{
+		__address__ = "sports-scanner.railway.internal:3004",
+	}]
+	forward_to      = [prometheus.relabel.filter_metrics.receiver]
+	job_name        = "sports-scanner"
+	scrape_interval = "60s"
+	scrape_timeout  = "60s"
+	metrics_path    = "/v1/metrics"
+}
+
+prometheus.scrape "notification-service" {
+	targets = [{
+		__address__ = "notification-service.railway.internal:3005",
+	}]
+	forward_to      = [prometheus.relabel.filter_metrics.receiver]
+	job_name        = "notification-service"
+	scrape_interval = "60s"
+	scrape_timeout  = "60s"
+	metrics_path    = "/v1/metrics"
+}
+
+prometheus.scrape "stripe-webhooks" {
+	targets = [{
+		__address__ = "stripe-webhooks.railway.internal:3010",
+	}]
+	forward_to      = [prometheus.relabel.filter_metrics.receiver]
+	job_name        = "stripe-webhooks"
+	scrape_interval = "60s"
+	scrape_timeout  = "60s"
+	metrics_path    = "/v1/metrics"
+}
+
 
 prometheus.scrape "bull_queue_monitor" {
 	targets = [{
@@ -112,7 +146,7 @@ prometheus.remote_write "default" {
 
 		basic_auth {
 			username = "1763099"
-			password = sys.env("GRAFANA_CLOUD_PW")
+			password = "glc_eyJvIjoiMTIwNzk5MSIsIm4iOiJzdGFjay0xMDIzMjM4LWhtLXdyaXRlLXByb21ldGhldXNfZ2l0aHViIiwiayI6IjkzUHQ3QXowSDkydDk0eDloYzZNcnVaTyIsIm0iOnsiciI6InByb2QtdXMtZWFzdC0wIn19"
 		}
 
 		queue_config { }
@@ -137,7 +171,7 @@ loki.write "grafanacloud" {
 
     basic_auth {
       username = "981018"
-      password = sys.env("GRAFANA_CLOUD_PW")
+      password = "glc_eyJvIjoiMTIwNzk5MSIsIm4iOiJzdGFjay0xMDIzMjM4LWhtLXdyaXRlLXByb21ldGhldXNfZ2l0aHViIiwiayI6IjkzUHQ3QXowSDkydDk0eDloYzZNcnVaTyIsIm0iOnsiciI6InByb2QtdXMtZWFzdC0wIn19"
     }
   }
 }
