@@ -19,7 +19,7 @@ datasources:
     basicAuth:
     basicAuthUser:
     withCredentials:
-    isDefault: true
+    isDefault: false
   - name: Prometheus
     type: prometheus
     access: proxy
@@ -31,7 +31,7 @@ datasources:
     basicAuth:
     basicAuthUser:
     withCredentials:
-    isDefault: false
+    isDefault: true
   - name: Tempo
     type: tempo
     access: proxy
@@ -48,7 +48,7 @@ datasources:
     type: redis-datasource
     access: proxy
     orgId: 1
-    isDefault: true
+    isDefault: false
     version: 1
     url: redis://$REDISHOST:$REDISPORT
     jsonData:
@@ -64,6 +64,7 @@ datasources:
     type: postgres
     url: $POSTGRES_INTERNAL_URL
     user: mb_reporting
+    isDefault: false
     secureJsonData:
       password: $REPORTING_PG_PASSWORD
     jsonData:
@@ -75,6 +76,7 @@ datasources:
       connMaxLifetime: 14400
       postgresVersion: 903 # 903=9.3, 904=9.4, 905=9.5, 906=9.6, 1000=10
       timescaledb: true
+
 apps:
   - name: Redis
     type: redis-app
