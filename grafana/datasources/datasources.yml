@@ -44,3 +44,40 @@ datasources:
     basicAuthUser:
     withCredentials:
     isDefault: false
+  - name: Redis
+    type: redis-datasource
+    access: proxy
+    orgId: 1
+    isDefault: true
+    version: 1
+    url: redis://$REDISHOST:$REDISPORT
+    jsonData:
+      client: standalone
+      poolSize: 5
+      timeout: 10
+      pingInterval: 0
+      pipelineWindow: 0
+    editable: true
+    secureJsonData:
+      password: $REDIS_PASSWORD
+  - name: MomentumBets Postgres
+    type: postgres
+    url: $POSTGRES_INTERNAL_URL
+    user: mb_reporting
+    secureJsonData:
+      password: $REPORTING_PG_PASSWORD
+    jsonData:
+      database: postgres
+      sslmode: "disable" # disable/require/verify-ca/verify-full
+      maxOpenConns: 100
+      maxIdleConns: 100
+      maxIdleConnsAuto: true
+      connMaxLifetime: 14400
+      postgresVersion: 903 # 903=9.3, 904=9.4, 905=9.5, 906=9.6, 1000=10
+      timescaledb: true
+apps:
+  - name: Redis
+    type: redis-app
+    disabled: false
+    orgId: 1
+    uid: grafana_redis
