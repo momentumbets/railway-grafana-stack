@@ -91,7 +91,7 @@ prometheus.scrape "criteria_evaluator" {
 	metrics_path    = "/v1/metrics"
 }
 
-prometheus.scrape "sports-scanner" {
+prometheus.scrape "sports_scanner" {
 	targets = [{
 		__address__ = "sports-scanner.railway.internal:3004",
 	}]
@@ -102,7 +102,7 @@ prometheus.scrape "sports-scanner" {
 	metrics_path    = "/v1/metrics"
 }
 
-prometheus.scrape "notification-service" {
+prometheus.scrape "notification_service" {
 	targets = [{
 		__address__ = "notification-service.railway.internal:3005",
 	}]
@@ -113,7 +113,7 @@ prometheus.scrape "notification-service" {
 	metrics_path    = "/v1/metrics"
 }
 
-prometheus.scrape "stripe-webhooks" {
+prometheus.scrape "stripe_webhooks" {
 	targets = [{
 		__address__ = "stripe-webhooks.railway.internal:3010",
 	}]
