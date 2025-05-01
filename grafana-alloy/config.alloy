@@ -38,7 +38,7 @@ otelcol.exporter.loki "otlp_logs_out" {
 
 // Existing Prometheus and Loki configurations remain as they are
 prometheus.relabel "filter_metrics" {
-	forward_to = [prometheus.remote_write.default.receiver]
+	forward_to = [prometheus.remote_write.default.receiver, prometheus.remote_write.selfhosted.receiver]
 
 	// Drop metrics you don't want
 	rule {
