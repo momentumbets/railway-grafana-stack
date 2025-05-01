@@ -161,7 +161,8 @@ loki.source.api "listener" {
         listen_port    = 3100
     }
     labels = { "source" = "api" }
-    forward_to = [loki.write.selfhosted.receiver, loki.write.grafanacloud.receiver]
+    forward_to = [loki.write.selfhosted.receiver]
+	# forward_to = [loki.write.selfhosted.receiver, loki.write.grafanacloud.receiver]
 }
 
 
