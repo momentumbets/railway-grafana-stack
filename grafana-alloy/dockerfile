@@ -5,6 +5,11 @@ COPY config.alloy /etc/alloy/config.alloy
 
 # expose the alloy server port
 EXPOSE 12345
+# otel
+EXPOSE 4317
+EXPOSE 4318
+# LOKI
+EXPOSE 3100
 
 # set the entrypoint command
 CMD        [ "run", "--server.http.listen-addr=0.0.0.0:12345", \
