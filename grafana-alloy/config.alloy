@@ -32,13 +32,13 @@ otelcol.exporter.prometheus "otlp_metrics_out" {
 }
 
 otelcol.exporter.loki "otlp_logs_out" {
-  forward_to = [loki.write.selfhosted.receiver, loki.write.grafanacloud.receiver]
+  forward_to = [loki.write.selfhosted.receiver]
 }
 
 
 // Existing Prometheus and Loki configurations remain as they are
 prometheus.relabel "filter_metrics" {
-	forward_to = [prometheus.remote_write.default.receiver, prometheus.remote_write.selfhosted.receiver]
+	forward_to = [prometheus.remote_write.selfhosted.receiver]
 
 	// Drop metrics you don't want
 	rule {
@@ -57,6 +57,18 @@ prometheus.scrape "prometheus" {
 	scrape_interval = "60s"
 	scrape_timeout  = "60s"
 }
+
+prometheus.scrape "grafana" {
+	targets = [{
+		__address__ = "grafana-28261f21.railway.internal:8080",
+	}]
+	forward_to      = [prometheus.relabel.filter_metrics.receiver]
+	job_name        = "grafana"
+	scrape_interval = "60s"
+	scrape_timeout  = "60s"
+	metrics_path    = "/metrics"
+}
+
 
 prometheus.scrape "server" {
 	targets = [{
@@ -136,25 +148,6 @@ prometheus.scrape "bull_queue_monitor" {
 	metrics_path    = "/metrics"
 }
 
-prometheus.remote_write "default" {
-	external_labels = {
-		monitor = "railway-prom",
-	}
-
-	endpoint {
-		url = "https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom/push"
-
-		basic_auth {
-			username = "1763099"
-			password = "glc_eyJvIjoiMTIwNzk5MSIsIm4iOiJzdGFjay0xMDIzMjM4LWhtLXdyaXRlLXByb21ldGhldXNfZ2l0aHViIiwiayI6IjkzUHQ3QXowSDkydDk0eDloYzZNcnVaTyIsIm0iOnsiciI6InByb2QtdXMtZWFzdC0wIn19"
-		}
-
-		queue_config { }
-
-		metadata_config { }
-	}
-}
-
 loki.source.api "listener" {
     http {
         listen_address = "0.0.0.0"
@@ -162,18 +155,6 @@ loki.source.api "listener" {
     }
     labels = { "source" = "api" }
     forward_to = [loki.write.selfhosted.receiver]
-}
-
-
-loki.write "grafanacloud" {
-  endpoint {
-    url = "https://logs-prod-006.grafana.net/loki/api/v1/push"
-
-    basic_auth {
-      username = "981018"
-      password = "glc_eyJvIjoiMTIwNzk5MSIsIm4iOiJzdGFjay0xMDIzMjM4LWhtLXdyaXRlLXByb21ldGhldXNfZ2l0aHViIiwiayI6IjkzUHQ3QXowSDkydDk0eDloYzZNcnVaTyIsIm0iOnsiciI6InByb2QtdXMtZWFzdC0wIn19"
-    }
-  }
 }
 
 loki.write "selfhosted" {
