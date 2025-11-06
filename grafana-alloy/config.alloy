@@ -92,12 +92,12 @@ prometheus.scrape "queues" {
 	metrics_path    = "/v1/queues/metrics"
 }
 
-prometheus.scrape "odds-ingestion" {
+prometheus.scrape "odds_ingestion" {
 	targets = [{
 		__address__ = "odds-ingestion.railway.internal:3005",
 	}]
 	forward_to      = [prometheus.relabel.filter_metrics.receiver]
-	job_name        = "odds-ingestion"
+	job_name        = "odds_ingestion"
 	scrape_interval = "60s"
 	scrape_timeout  = "60s"
 	metrics_path    = "/v1/metrics"
