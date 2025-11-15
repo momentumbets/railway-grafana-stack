@@ -159,17 +159,6 @@ prometheus.scrape "bull_queue_monitor" {
 	metrics_path    = "/metrics"
 }
 
-prometheus.scrape "postgres" {
-  targets = [{
-    __address__ 	= "postgres-exporter.railway.internal:9187",
-  }]
-  forward_to 		= [prometheus.relabel.filter_metrics.receiver]
-  job_name 			= "postgres"
-  scrape_interval 	= "60s"
-  scrape_timeout 	= "60s"
-  metrics_path 		= "/metrics"
-}
-
 loki.source.api "listener" {
     http {
         listen_address = "0.0.0.0"
