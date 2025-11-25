@@ -103,6 +103,17 @@ prometheus.scrape "odds_ingestion" {
 	metrics_path    = "/v1/metrics"
 }
 
+prometheus.scrape "odds_ingestion_worker_1" {
+	targets = [{
+		__address__ = "odds-ingestion-worker.railway.internal:3005",
+	}]
+	forward_to      = [prometheus.relabel.filter_metrics.receiver]
+	job_name        = "odds_ingestion_worker_1"
+	scrape_interval = "60s"
+	scrape_timeout  = "60s"
+	metrics_path    = "/v1/metrics"
+}
+
 prometheus.scrape "criteria_evaluator" {
 	targets = [{
 		__address__ = "criteria-evaluator.railway.internal:3003",
