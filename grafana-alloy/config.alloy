@@ -87,8 +87,8 @@ prometheus.scrape "queues" {
 	}]
 	forward_to      = [prometheus.relabel.filter_metrics.receiver]
 	job_name        = "queues"
-	scrape_interval = "60s"
-	scrape_timeout  = "60s"
+	scrape_interval = "10s"
+	scrape_timeout  = "10s"
 	metrics_path    = "/v1/queues/metrics"
 }
 
@@ -156,18 +156,6 @@ prometheus.scrape "stripe_webhooks" {
 	scrape_interval = "60s"
 	scrape_timeout  = "60s"
 	metrics_path    = "/v1/metrics"
-}
-
-
-prometheus.scrape "bull_queue_monitor" {
-	targets = [{
-		__address__ = "bull-queue-monitor.railway.internal:3000",
-	}]
-	forward_to      = [prometheus.relabel.filter_metrics.receiver]
-	job_name        = "bull-queues"
-	scrape_interval = "60s"
-	scrape_timeout  = "60s"
-	metrics_path    = "/metrics"
 }
 
 loki.source.api "listener" {
