@@ -68,9 +68,7 @@ prometheus.scrape "grafana" {
 	scrape_interval = "60s"
 	scrape_timeout  = "60s"
 	metrics_path    = "/metrics"
-	http_client_config {
-		bearer_token = sys.env("ADMIN_ACCESS_TOKEN")
-	}
+	bearer_token    = sys.env("ADMIN_ACCESS_TOKEN")
 }
 
 
@@ -83,9 +81,7 @@ prometheus.scrape "server" {
 	scrape_interval = "60s"
 	scrape_timeout  = "60s"
 	metrics_path    = "/v1/metrics"
-	http_client_config {
-		bearer_token = sys.env("ADMIN_ACCESS_TOKEN")
-	}
+	bearer_token    = sys.env("ADMIN_ACCESS_TOKEN")
 }
 
 prometheus.scrape "queues" {
@@ -96,13 +92,8 @@ prometheus.scrape "queues" {
 	job_name        = "queues"
 	scrape_interval = "10s"
 	scrape_timeout  = "10s"
-	metrics_path    = "/v1/queues/metrics"	
-	http_client_config {
-		authorization {
-			type        = "Bearer"
-			credentials = sys.env("ADMIN_ACCESS_TOKEN")
-		}
-	}
+	metrics_path    = "/v1/queues/metrics"
+	bearer_token    = sys.env("ADMIN_ACCESS_TOKEN")
 }
 
 prometheus.scrape "odds_ingestion" {
@@ -114,12 +105,7 @@ prometheus.scrape "odds_ingestion" {
 	scrape_interval = "60s"
 	scrape_timeout  = "60s"
 	metrics_path    = "/v1/metrics"
-	http_client_config {
-		authorization {
-			type        = "Bearer"
-			credentials = sys.env("ADMIN_ACCESS_TOKEN")
-		}
-	}
+	bearer_token    = sys.env("ADMIN_ACCESS_TOKEN")
 }
 
 prometheus.scrape "odds_ingestion_worker_1" {
@@ -131,9 +117,7 @@ prometheus.scrape "odds_ingestion_worker_1" {
 	scrape_interval = "60s"
 	scrape_timeout  = "60s"
 	metrics_path    = "/v1/metrics"
-	http_client_config {
-		bearer_token = sys.env("ADMIN_ACCESS_TOKEN")
-	}
+	bearer_token    = sys.env("ADMIN_ACCESS_TOKEN")
 }
 
 prometheus.scrape "criteria_evaluator" {
@@ -145,9 +129,7 @@ prometheus.scrape "criteria_evaluator" {
 	scrape_interval = "60s"
 	scrape_timeout  = "60s"
 	metrics_path    = "/v1/metrics"
-	http_client_config {
-		bearer_token = sys.env("ADMIN_ACCESS_TOKEN")
-	}
+	bearer_token    = sys.env("ADMIN_ACCESS_TOKEN")
 }
 
 prometheus.scrape "sports_scanner" {
@@ -159,9 +141,7 @@ prometheus.scrape "sports_scanner" {
 	scrape_interval = "60s"
 	scrape_timeout  = "60s"
 	metrics_path    = "/v1/metrics"
-	http_client_config {
-		bearer_token = sys.env("ADMIN_ACCESS_TOKEN")
-	}
+	bearer_token    = sys.env("ADMIN_ACCESS_TOKEN")
 }
 
 prometheus.scrape "notification_service" {
@@ -173,9 +153,7 @@ prometheus.scrape "notification_service" {
 	scrape_interval = "60s"
 	scrape_timeout  = "60s"
 	metrics_path    = "/v1/metrics"
-	http_client_config {
-		bearer_token = sys.env("ADMIN_ACCESS_TOKEN")
-	}
+	bearer_token    = sys.env("ADMIN_ACCESS_TOKEN")
 }
 
 prometheus.scrape "stripe_webhooks" {
@@ -187,9 +165,7 @@ prometheus.scrape "stripe_webhooks" {
 	scrape_interval = "60s"
 	scrape_timeout  = "60s"
 	metrics_path    = "/v1/metrics"
-	http_client_config {
-		bearer_token = sys.env("ADMIN_ACCESS_TOKEN")
-	}
+	bearer_token    = sys.env("ADMIN_ACCESS_TOKEN")
 }
 
 loki.source.api "listener" {
