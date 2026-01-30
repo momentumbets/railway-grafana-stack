@@ -44,6 +44,37 @@ datasources:
     basicAuthUser:
     withCredentials:
     isDefault: false
+    jsonData:
+      # Enable trace to metrics correlation
+      tracesToMetrics:
+        datasourceUid: grafana_prometheus
+        tags:
+          - key: service.name
+            value: service_name
+          - key: service.namespace
+            value: service_namespace
+          - key: http.method
+          - key: http.status_code
+        queries:
+          - name: Sample rate
+            query: "sum(rate(traces_spanmetrics_calls_total{$$__tags}[$$__rate_interval]))"
+          - name: Error rate
+            query: 'sum(rate(traces_spanmetrics_calls_total{$$__tags,status_code="STATUS_CODE_ERROR"}[$$__rate_interval]))'
+          - name: Duration
+            query: "histogram_quantile(0.9, sum(rate(traces_spanmetrics_duration_bucket{$$__tags}[$$__rate_interval])) by (le))"
+      # Enable trace to logs correlation
+      tracesToLogs:
+        datasourceUid: grafana_lokiq
+        tags:
+          - service.name
+          - service.namespace
+        filterByTraceID: true
+        filterBySpanID: true
+      # Enable service map
+      serviceMap:
+        datasourceUid: grafana_prometheus
+      nodeGraph:
+        enabled: true
   - name: Redis
     type: redis-datasource
     access: proxy
