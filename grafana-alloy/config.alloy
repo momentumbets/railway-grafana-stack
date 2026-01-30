@@ -21,7 +21,7 @@ otelcol.processor.batch "all_signals" {
   }
 }
 
-# OTLP ingest is on port 4318; TEMPO_INTERNAL_URL is for query (3200). Set TEMPO_OTLP_INTERNAL_URL for trace export.
+// OTLP ingest is on port 4318; TEMPO_INTERNAL_URL is for query (3200). Set TEMPO_OTLP_INTERNAL_URL for trace export.
 otelcol.exporter.otlp "default" {
   client {
     endpoint = sys.env("TEMPO_OTLP_INTERNAL_URL") + "/v1/traces"
