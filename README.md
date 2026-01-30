@@ -121,6 +121,8 @@ When configuring your application to send traces to Tempo, please use one of the
 
 Another thing to note is that the ingest API endpoint for the HTTP server is `/v1/traces`. For a working example of this in a node.js express API, see `/examples/api/tracer.js` in our GitHub repository.
 
+**Grafana Alloy**: If you run Grafana Alloy (e.g. `grafana-alloy/config.alloy`) to forward OTLP traces to Tempo, set `TEMPO_OTLP_INTERNAL_URL` to the OTLP ingest URL (e.g. `${{Tempo.INTERNAL_HTTP_INGEST}}` or `http://tempo:4318`). Do not use `TEMPO_INTERNAL_URL` for trace export—that is the query API (port 3200); ingest is on port 4318.
+
 ### Using otherwise standard observability tooling
 
 To send data from your other Railway applications to this observability stack:
@@ -129,8 +131,9 @@ To send data from your other Railway applications to this observability stack:
    ```
    LOKI_URL=${{Grafana.LOKI_INTERNAL_URL}}
    PROMETHEUS_URL=${{Grafana.PROMETHEUS_INTERNAL_URL}}
-   TEMPO_URL=${{Grafana.TEMPO_INTERNAL_URL}}
+   TEMPO_URL=${{Tempo.INTERNAL_HTTP_INGEST}}
    ```
+   Note: Use Tempo's ingest URL (e.g. `INTERNAL_HTTP_INGEST`) for sending traces, not `TEMPO_INTERNAL_URL` (which is the query API on port 3200).
 2. Configure your application's logging, metrics, or tracing libraries to use these URLs
 3. Your application data will automatically appear in your Grafana dashboards
 
