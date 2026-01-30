@@ -21,9 +21,10 @@ otelcol.processor.batch "all_signals" {
   }
 }
 
+# OTLP ingest is on port 4318; TEMPO_INTERNAL_URL is for query (3200). Set TEMPO_OTLP_INTERNAL_URL for trace export.
 otelcol.exporter.otlp "default" {
   client {
-    endpoint = sys.env("TEMPO_INTERNAL_URL") + "/v1/traces"
+    endpoint = sys.env("TEMPO_OTLP_INTERNAL_URL") + "/v1/traces"
   }
 }
 
@@ -68,10 +69,7 @@ prometheus.scrape "grafana" {
 	scrape_timeout  = "60s"
 	metrics_path    = "/metrics"
 	http_client_config {
-		authorization {
-			type        = "Bearer"
-			credentials = sys.env("ADMIN_ACCESS_TOKEN")
-		}
+		bearer_token = sys.env("ADMIN_ACCESS_TOKEN")
 	}
 }
 
@@ -86,10 +84,7 @@ prometheus.scrape "server" {
 	scrape_timeout  = "60s"
 	metrics_path    = "/v1/metrics"
 	http_client_config {
-		authorization {
-			type        = "Bearer"
-			credentials = sys.env("ADMIN_ACCESS_TOKEN")
-		}
+		bearer_token = sys.env("ADMIN_ACCESS_TOKEN")
 	}
 }
 
@@ -137,10 +132,7 @@ prometheus.scrape "odds_ingestion_worker_1" {
 	scrape_timeout  = "60s"
 	metrics_path    = "/v1/metrics"
 	http_client_config {
-		authorization {
-			type        = "Bearer"
-			credentials = sys.env("ADMIN_ACCESS_TOKEN")
-		}
+		bearer_token = sys.env("ADMIN_ACCESS_TOKEN")
 	}
 }
 
@@ -154,10 +146,7 @@ prometheus.scrape "criteria_evaluator" {
 	scrape_timeout  = "60s"
 	metrics_path    = "/v1/metrics"
 	http_client_config {
-		authorization {
-			type        = "Bearer"
-			credentials = sys.env("ADMIN_ACCESS_TOKEN")
-		}
+		bearer_token = sys.env("ADMIN_ACCESS_TOKEN")
 	}
 }
 
@@ -171,10 +160,7 @@ prometheus.scrape "sports_scanner" {
 	scrape_timeout  = "60s"
 	metrics_path    = "/v1/metrics"
 	http_client_config {
-		authorization {
-			type        = "Bearer"
-			credentials = sys.env("ADMIN_ACCESS_TOKEN")
-		}
+		bearer_token = sys.env("ADMIN_ACCESS_TOKEN")
 	}
 }
 
@@ -188,10 +174,7 @@ prometheus.scrape "notification_service" {
 	scrape_timeout  = "60s"
 	metrics_path    = "/v1/metrics"
 	http_client_config {
-		authorization {
-			type        = "Bearer"
-			credentials = sys.env("ADMIN_ACCESS_TOKEN")
-		}
+		bearer_token = sys.env("ADMIN_ACCESS_TOKEN")
 	}
 }
 
@@ -205,10 +188,7 @@ prometheus.scrape "stripe_webhooks" {
 	scrape_timeout  = "60s"
 	metrics_path    = "/v1/metrics"
 	http_client_config {
-		authorization {
-			type        = "Bearer"
-			credentials = sys.env("ADMIN_ACCESS_TOKEN")
-		}
+		bearer_token = sys.env("ADMIN_ACCESS_TOKEN")
 	}
 }
 
