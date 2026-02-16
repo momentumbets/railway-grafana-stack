@@ -164,7 +164,7 @@ prometheus.scrape "stripe_webhooks" {
 	job_name        = "stripe-webhooks"
 	scrape_interval = "60s"
 	scrape_timeout  = "60s"
-	metrics_path    = "/v1/metrics"
+	metrics_path    = "/metrics"
 	bearer_token    = sys.env("ADMIN_ACCESS_TOKEN")
 }
 
