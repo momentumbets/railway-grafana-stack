@@ -2,11 +2,6 @@ server:
   http_listen_port: 3200
   grpc_listen_port: 9095
 
-# Single-instance mode - disable memberlist
-memberlist:
-  abort_if_cluster_join_fails: false
-  join_members: []
-
 storage:
   trace:
     backend: local
@@ -14,35 +9,12 @@ storage:
       path: /var/tempo/traces
     wal:
       path: /var/tempo/wal
-
-# Ingester config for single instance
-ingester:
-  lifecycler:
-    ring:
-      kvstore:
-        store: inmemory
-      replication_factor: 1
-    final_sleep: 0s
-  trace_idle_period: 10s
-  max_block_bytes: 1_000_000
-  max_block_duration: 5m
-
-# Compactor - reduces the "no jobs found" spam
-compactor:
-  compaction:
-    block_retention: 48h
-  ring:
-    kvstore:
-      store: inmemory
-
-# Querier config
-querier:
-  frontend_worker:
-    frontend_address: ""
+    block:
+      bloom_filter_false_positive: 0.05
+      v2_index_downsample_bytes: 1000
+      v2_encoding: zstd
 
 distributor:
-  log_received_spans:
-    enabled: true
   receivers:
     otlp:
       protocols:
@@ -51,13 +23,18 @@ distributor:
         http:
           endpoint: "0.0.0.0:4318"
 
-# Metrics generator - generates RED metrics from spans
+ingester:
+  max_block_duration: 5m
+
+querier:
+  max_concurrent_queries: 20
+
 metrics_generator:
   registry:
     collection_interval: 15s
     stale_duration: 15m
     external_labels:
-      cluster: railway-cluster
+      cluster: railway
       env: production
   storage:
     path: /var/tempo/generator/wal
@@ -66,25 +43,15 @@ metrics_generator:
         send_exemplars: true
   processor:
     service_graphs:
-      histogram_buckets: [0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4, 12.8]
       dimensions:
         - http.method
         - http.status_code
-      wait: 10s
-      max_items: 10000
     span_metrics:
-      histogram_buckets: [0.002, 0.004, 0.008, 0.016, 0.032, 0.064, 0.128, 0.256, 0.512, 1.024, 2.048, 4.096, 8.192, 16.384]
-      intrinsic_dimensions:
-        service: true
-        span_name: true
-        span_kind: true
-        status_code: true
       dimensions:
         - http.method
         - http.status_code
         - service.name
 
-# Overrides for resource limits
 overrides:
   defaults:
     metrics_generator:
