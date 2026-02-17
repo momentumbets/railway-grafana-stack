@@ -17,14 +17,18 @@ otelcol.processor.batch "all_signals" {
   output {
     metrics = [otelcol.exporter.prometheus.otlp_metrics_out.input]
     logs    = [otelcol.exporter.loki.otlp_logs_out.input]
-    traces  = [otelcol.exporter.otlp.default.input]
+    traces  = [otelcol.exporter.otlphttp.default.input]
   }
 }
 
-// OTLP ingest is on port 4318; TEMPO_INTERNAL_URL is for query (3200). Set TEMPO_OTLP_INTERNAL_URL for trace export.
-otelcol.exporter.otlp "default" {
+// OTLP trace export to Tempo via HTTP (port 4318)
+// Set TEMPO_OTLP_INTERNAL_URL to http://tempo.railway.internal:4318
+otelcol.exporter.otlphttp "default" {
   client {
-    endpoint = sys.env("TEMPO_OTLP_INTERNAL_URL") + "/v1/traces"
+    endpoint = sys.env("TEMPO_OTLP_INTERNAL_URL")
+    tls {
+      insecure = true
+    }
   }
 }
 
