@@ -1,3 +1,5 @@
+stream_over_http_enabled: true
+
 server:
   http_listen_port: 3200
   grpc_listen_port: 9095
@@ -9,10 +11,6 @@ storage:
       path: /var/tempo/traces
     wal:
       path: /var/tempo/wal
-    block:
-      bloom_filter_false_positive: 0.05
-      v2_index_downsample_bytes: 1000
-      v2_encoding: zstd
 
 distributor:
   receivers:
@@ -28,31 +26,3 @@ ingester:
 
 querier:
   max_concurrent_queries: 20
-
-metrics_generator:
-  registry:
-    collection_interval: 15s
-    stale_duration: 15m
-    external_labels:
-      cluster: railway
-      env: production
-  storage:
-    path: /var/tempo/generator/wal
-    remote_write:
-      - url: http://prometheus.railway.internal:9090/api/v1/write
-        send_exemplars: true
-  processor:
-    service_graphs:
-      dimensions:
-        - http.method
-        - http.status_code
-    span_metrics:
-      dimensions:
-        - http.method
-        - http.status_code
-        - service.name
-
-overrides:
-  defaults:
-    metrics_generator:
-      processors: [service-graphs, span-metrics]
