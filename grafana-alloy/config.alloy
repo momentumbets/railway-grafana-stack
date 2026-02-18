@@ -75,6 +75,40 @@ prometheus.scrape "grafana" {
 	bearer_token    = sys.env("ADMIN_ACCESS_TOKEN")
 }
 
+// Grafana stack internal services
+prometheus.scrape "tempo" {
+	targets = [{
+		__address__ = "tempo.railway.internal:3200",
+	}]
+	forward_to      = [prometheus.relabel.filter_metrics.receiver]
+	job_name        = "tempo"
+	scrape_interval = "60s"
+	scrape_timeout  = "60s"
+	metrics_path    = "/metrics"
+}
+
+prometheus.scrape "loki" {
+	targets = [{
+		__address__ = "loki.railway.internal:3100",
+	}]
+	forward_to      = [prometheus.relabel.filter_metrics.receiver]
+	job_name        = "loki"
+	scrape_interval = "60s"
+	scrape_timeout  = "60s"
+	metrics_path    = "/metrics"
+}
+
+prometheus.scrape "alloy" {
+	targets = [{
+		__address__ = "localhost:12345",
+	}]
+	forward_to      = [prometheus.relabel.filter_metrics.receiver]
+	job_name        = "alloy"
+	scrape_interval = "60s"
+	scrape_timeout  = "60s"
+	metrics_path    = "/metrics"
+}
+
 
 prometheus.scrape "server" {
 	targets = [{
