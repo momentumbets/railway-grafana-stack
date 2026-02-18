@@ -4,14 +4,6 @@ server:
   http_listen_port: 3200
   grpc_listen_port: 9095
 
-storage:
-  trace:
-    backend: local
-    local:
-      path: /var/tempo/traces
-    wal:
-      path: /var/tempo/wal
-
 distributor:
   receivers:
     otlp:
@@ -31,3 +23,11 @@ ingester:
 
 querier:
   max_concurrent_queries: 20
+
+storage:
+  trace:
+    backend: "local"
+    wal:
+      path: /var/tempo/wal
+    local:
+      path: /var/tempo/blocks
