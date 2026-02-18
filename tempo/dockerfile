@@ -2,6 +2,6 @@ ARG VERSION=v2.10.0
 
 FROM grafana/tempo:${VERSION}
 
-COPY tempo.yml /etc/tempo/tempo.yml
-
-CMD ["-config.file=/etc/tempo/tempo.yml"]# Trigger rebuild Wed Feb 18 06:17:02 AM PST 2026
+# Use Tempo's built-in default config - don't override
+# Just expose OTLP ports
+EXPOSE 3200 4317 4318
