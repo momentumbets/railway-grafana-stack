@@ -1,10 +1,15 @@
-stream_over_http_enabled: true
-
 server:
   http_listen_port: 3200
-  grpc_listen_port: 9095
+
+storage:
+  trace:
+    backend: local
+    local:
+      path: /var/tempo/traces
 
 distributor:
+  log_received_spans:
+    enabled: true
   receivers:
     otlp:
       protocols:
@@ -13,21 +18,72 @@ distributor:
         http:
           endpoint: "0.0.0.0:4318"
 
-ingester:
-  max_block_duration: 5m
-  lifecycler:
-    ring:
-      kvstore:
-        store: inmemory
-      replication_factor: 1
+# Metrics generator configuration - generates RED metrics from spans
+metrics_generator:
+  # Registry configuration for metrics collection
+  registry:
+    collection_interval: 15s
+    stale_duration: 15m
+    external_labels:
+      cluster: railway-cluster
+      env: production
 
-querier:
-  max_concurrent_queries: 20
+  # Storage configuration for metrics data
+  storage:
+    path: /var/tempo/generator/wal
+    remote_write:
+      - url: http://prometheus:9090/api/v1/write
+        send_exemplars: true
 
-storage:
-  trace:
-    backend: "local"
-    wal:
-      path: /var/tempo/wal
-    local:
-      path: /var/tempo/blocks
+  # Processor configuration
+  processor:
+    # Service graph metrics (RED metrics between services)
+    service_graphs:
+      histogram_buckets: [0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4, 12.8]
+      dimensions:
+        - http.method
+        - http.status_code
+        - service.namespace
+      wait: 10s
+      max_items: 10000
+      workers: 10
+
+    # Span metrics (RED metrics per span)
+    span_metrics:
+      histogram_buckets:
+        [
+          0.002,
+          0.004,
+          0.008,
+          0.016,
+          0.032,
+          0.064,
+          0.128,
+          0.256,
+          0.512,
+          1.024,
+          2.048,
+          4.096,
+          8.192,
+          16.384,
+        ]
+      # Intrinsic dimensions from span properties
+      intrinsic_dimensions:
+        service: true
+        span_name: true
+        span_kind: true
+        status_code: true
+        status_message: false
+      # Additional dimensions from span attributes
+      dimensions:
+        - http.method
+        - http.status_code
+        - service.namespace
+        - service.version
+        - service.name
+        - operation
+      # Enable target info metrics for better service discovery
+      enable_target_info: true
+
+  # How long to wait before considering spans too old for metrics
+  metrics_ingestion_time_range_slack: 30s
