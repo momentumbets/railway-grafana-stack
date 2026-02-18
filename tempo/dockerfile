@@ -4,4 +4,4 @@ FROM grafana/tempo:${VERSION}
 
 COPY tempo.yml /etc/tempo/tempo.yml
 
-CMD ["-config.file=/etc/tempo/tempo.yml"]
+CMD ["-config.file=/etc/tempo/tempo.yml"]# Trigger rebuild Wed Feb 18 06:17:02 AM PST 2026
