@@ -2,5 +2,8 @@ ARG VERSION=12.3.3
 
 FROM grafana/grafana-oss:${VERSION}
 
-# copy the datasources and dashboards
+# Copy custom config for JSON logging
+COPY grafana.ini /etc/grafana/grafana.ini
+
+# Copy the datasources and dashboards
 COPY datasources /etc/grafana/provisioning/datasources
