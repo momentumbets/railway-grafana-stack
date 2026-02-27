@@ -32,15 +32,15 @@ ingester:
         store: inmemory
       replication_factor: 1
     num_tokens: 512
+  partition_ring:
+    kvstore:
+      store: inmemory
 
 # Memberlist disabled for single-instance (use inmemory KV everywhere)
 memberlist:
   abort_if_cluster_join_fails: false
 
-# Ingester partition ring for single-instance (Tempo v2.10+)
-ingester_partition_ring:
-  kvstore:
-    store: inmemory
+
 
 querier:
   max_concurrent_queries: 20
