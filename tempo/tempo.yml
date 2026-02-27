@@ -23,7 +23,7 @@ distributor:
         http:
           endpoint: "0.0.0.0:4318"
 
-# Single-instance ring config (required to avoid "empty ring" error)
+# Single-instance ring config
 ingester:
   max_block_duration: 5m
   lifecycler:
@@ -32,21 +32,15 @@ ingester:
         store: inmemory
       replication_factor: 1
     num_tokens: 512
-  partition_ring:
-    kvstore:
-      store: inmemory
 
-# Memberlist disabled for single-instance (use inmemory KV everywhere)
+# Memberlist disabled for single-instance
 memberlist:
   abort_if_cluster_join_fails: false
 
-
-
-# Disable live store partition ring (experimental, not needed for single-instance)
-partition_ring_live_store: false
-
 querier:
   max_concurrent_queries: 20
+  # Disable live-store querying (requires Kafka partition ring which we don't use)
+  query_live_store: false
 
 # Metrics generator - generates RED metrics from spans
 metrics_generator:
@@ -92,3 +86,11 @@ metrics_generator:
       enable_target_info: true
 
   metrics_ingestion_time_range_slack: 30s
+
+overrides:
+  defaults:
+    metrics_generator:
+      processors: ["span-metrics", "service-graphs"]
+
+usage_report:
+  reporting_enabled: false
