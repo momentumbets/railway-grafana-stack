@@ -23,7 +23,7 @@ distributor:
         http:
           endpoint: "0.0.0.0:4318"
 
-# Single-instance ring config
+# Single-instance ingester config
 ingester:
   max_block_duration: 5m
   lifecycler:
@@ -33,14 +33,12 @@ ingester:
       replication_factor: 1
     num_tokens: 512
 
-# Memberlist disabled for single-instance
+# Memberlist not needed for single-instance
 memberlist:
   abort_if_cluster_join_fails: false
 
 querier:
   max_concurrent_queries: 20
-  # Disable live-store querying (requires Kafka partition ring which we don't use)
-  query_live_store: false
 
 # Metrics generator - generates RED metrics from spans
 metrics_generator:
