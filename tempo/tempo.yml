@@ -42,12 +42,14 @@ memberlist:
 
 
 
-# Live store config for single-instance (Tempo v2.10+)
+# Enable live store partition ring (Tempo v2.10+)
+partition_ring_live_store: true
+
+# Live store config for single-instance
 live_store:
   ring:
     kvstore:
       store: inmemory
-    replication_factor: 1
   partition_ring:
     kvstore:
       store: inmemory
