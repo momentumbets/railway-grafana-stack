@@ -31,6 +31,11 @@ ingester:
       kvstore:
         store: inmemory
       replication_factor: 1
+    num_tokens: 512
+
+# Memberlist disabled for single-instance (use inmemory KV everywhere)
+memberlist:
+  abort_if_cluster_join_fails: false
 
 querier:
   max_concurrent_queries: 20
