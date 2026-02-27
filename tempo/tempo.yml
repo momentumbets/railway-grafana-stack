@@ -42,6 +42,16 @@ memberlist:
 
 
 
+# Live store config for single-instance (Tempo v2.10+)
+live_store:
+  ring:
+    kvstore:
+      store: inmemory
+    replication_factor: 1
+  partition_ring:
+    kvstore:
+      store: inmemory
+
 querier:
   max_concurrent_queries: 20
 
