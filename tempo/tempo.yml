@@ -42,17 +42,8 @@ memberlist:
 
 
 
-# Enable live store partition ring (Tempo v2.10+)
-partition_ring_live_store: true
-
-# Live store config for single-instance
-live_store:
-  ring:
-    kvstore:
-      store: inmemory
-  partition_ring:
-    kvstore:
-      store: inmemory
+# Disable live store partition ring (experimental, not needed for single-instance)
+partition_ring_live_store: false
 
 querier:
   max_concurrent_queries: 20
