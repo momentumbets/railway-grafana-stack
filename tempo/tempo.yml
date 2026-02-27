@@ -37,6 +37,11 @@ ingester:
 memberlist:
   abort_if_cluster_join_fails: false
 
+# Ingester partition ring for single-instance (Tempo v2.10+)
+ingester_partition_ring:
+  kvstore:
+    store: inmemory
+
 querier:
   max_concurrent_queries: 20
 
