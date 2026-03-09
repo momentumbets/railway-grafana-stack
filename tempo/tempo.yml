@@ -13,9 +13,15 @@ storage:
       path: /var/tempo/wal
 
 ingester:
-  max_block_duration: 10m # flush WAL more often (default 30m)
+  max_block_duration: 5m
   max_block_bytes: 50000000 # 50MB cap per block (default 500MB)
   flush_check_period: 10s
+  lifecycler:
+    ring:
+      kvstore:
+        store: inmemory
+      replication_factor: 1
+    num_tokens: 512
 
 compactor:
   compaction:
@@ -34,16 +40,6 @@ distributor:
           endpoint: "0.0.0.0:4317"
         http:
           endpoint: "0.0.0.0:4318"
-
-# Single-instance ingester config
-ingester:
-  max_block_duration: 5m
-  lifecycler:
-    ring:
-      kvstore:
-        store: inmemory
-      replication_factor: 1
-    num_tokens: 512
 
 # Memberlist not needed for single-instance
 memberlist:
