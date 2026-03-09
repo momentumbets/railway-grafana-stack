@@ -14,7 +14,7 @@ storage:
 
 ingester:
   max_block_duration: 10m # flush WAL more often (default 30m)
-  max_block_bytes: 50_000_000 # 50MB cap per block (default 500MB)
+  max_block_bytes: 50000000 # 50MB cap per block (default 500MB)
   flush_check_period: 10s
 
 compactor:
