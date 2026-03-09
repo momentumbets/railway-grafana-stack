@@ -29,6 +29,7 @@ compactor:
   ring:
     kvstore:
       store: inmemory
+    instance_addr: 127.0.0.1
 
 distributor:
   log_received_spans:
