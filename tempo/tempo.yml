@@ -97,7 +97,7 @@ metrics_generator:
 overrides:
   defaults:
     metrics_generator:
-      processors: ["span-metrics", "service-graphs", "local-blocks"]
+      processors: ["span-metrics", "service-graphs"]
 
 usage_report:
   reporting_enabled: false
