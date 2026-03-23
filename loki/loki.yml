@@ -1,4 +1,4 @@
-auth_enabled: false
+eauth_enabled: false
 
 server:
   http_listen_port: 3100
@@ -30,6 +30,7 @@ storage_config:
     cache_location: /loki/tsdb-cache
 
 limits_config:
+  allow_deletes: true
   volume_enabled: true
   ingestion_rate_mb: 8
   ingestion_burst_size_mb: 16
