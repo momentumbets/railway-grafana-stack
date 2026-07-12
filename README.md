@@ -39,7 +39,7 @@ This template is perfect for teams who need a comprehensive observability soluti
 | `GF_SECURITY_ADMIN_USER` | Username for the Grafana admin account | Required input |
 | `GF_SECURITY_ADMIN_PASSWORD` | Password for the Grafana admin account | Auto-generated secure string |
 | `GF_DEFAULT_INSTANCE_NAME` | Name of your Grafana instance | `Grafana on Railway` |
-| `GF_INSTALL_PLUGINS` | Comma-separated list of Grafana plugins to install | `grafana-simple-json-datasource,grafana-piechart-panel,grafana-worldmap-panel,grafana-clock-panel` |
+| `GF_INSTALL_PLUGINS` | Comma-separated list of Grafana plugins to install. Do not include Angular plugins such as `grafana-worldmap-panel`; Grafana 12 rejects them. | `grafana-simple-json-datasource,grafana-piechart-panel,grafana-clock-panel` |
 | `MB_STACK_GRAFANA_CONFIG_REPO` | GitHub `owner/repo` containing Momentum Bets Grafana GitOps data | `momentumbets/mb-stack` |
 | `MB_STACK_GRAFANA_CONFIG_REF` | Git ref to download before Grafana starts | `main` |
 | `MB_STACK_GRAFANA_CONFIG_PATH` | Path inside that repo containing dashboards/provisioning files | `grafana/gitops` |
