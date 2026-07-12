@@ -40,6 +40,11 @@ This template is perfect for teams who need a comprehensive observability soluti
 | `GF_SECURITY_ADMIN_PASSWORD` | Password for the Grafana admin account | Auto-generated secure string |
 | `GF_DEFAULT_INSTANCE_NAME` | Name of your Grafana instance | `Grafana on Railway` |
 | `GF_INSTALL_PLUGINS` | Comma-separated list of Grafana plugins to install | `grafana-simple-json-datasource,grafana-piechart-panel,grafana-worldmap-panel,grafana-clock-panel` |
+| `MB_STACK_GRAFANA_CONFIG_REPO` | GitHub `owner/repo` containing Momentum Bets Grafana GitOps data | `momentumbets/mb-stack` |
+| `MB_STACK_GRAFANA_CONFIG_REF` | Git ref to download before Grafana starts | `main` |
+| `MB_STACK_GRAFANA_CONFIG_PATH` | Path inside that repo containing dashboards/provisioning files | `grafana/gitops` |
+| `MB_STACK_GRAFANA_CONFIG_TOKEN` | Optional GitHub token for private repo/archive access. Falls back to `GITHUB_TOKEN`. | unset |
+| `MB_STACK_GRAFANA_CONFIG_REQUIRED` | If `true`, fail startup when the GitOps bundle cannot be downloaded/copied. If false, log a warning and start Grafana with local config only. | `false` |
 
 ### Internal Service URLs
 
@@ -106,6 +111,16 @@ This template deploys four interconnected services:
 - Persistent volume for trace data
 
 All services are deployed using official Docker images and configured to work together seamlessly.
+
+## Git-backed Momentum Bets dashboards and alerts
+
+The Grafana image downloads a Momentum Bets Grafana GitOps bundle before Grafana starts. By default it reads `momentumbets/mb-stack@grafana/gitops` from the `main` branch and copies:
+
+- dashboards into `/var/lib/grafana/dashboards/mb-stack`,
+- dashboard provider files into `/etc/grafana/provisioning/dashboards`, and
+- alert provisioning files into `/etc/grafana/provisioning/alerting`.
+
+For private repo access, set `MB_STACK_GRAFANA_CONFIG_TOKEN` or `GITHUB_TOKEN` on the Grafana Railway service. During review/testing you can point `MB_STACK_GRAFANA_CONFIG_REF` at a PR branch; for production, keep it on `main` after the mb-stack Grafana data PR merges.
 
 ## Connecting Your Applications
 
