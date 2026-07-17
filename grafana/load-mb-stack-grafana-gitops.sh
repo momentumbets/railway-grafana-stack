@@ -14,6 +14,7 @@ ALERT_PROV_DEST="${MB_STACK_GRAFANA_ALERT_PROVISIONING_DEST:-/etc/grafana/provis
 REQUIRED="${MB_STACK_GRAFANA_CONFIG_REQUIRED:-false}"
 TOKEN="${MB_STACK_GRAFANA_CONFIG_TOKEN:-${GITHUB_TOKEN:-}}"
 DATA_DIR="${GF_PATHS_DATA:-/var/lib/grafana}"
+PLUGIN_DIR="${GF_PATHS_PLUGINS:-${DATA_DIR%/}/plugins}"
 TMP_DIR="$(mktemp -d "${DATA_DIR%/}/mb-stack-grafana.XXXXXX")"
 cleanup() {
   rm -rf "$TMP_DIR"
@@ -33,6 +34,18 @@ start_grafana() {
 }
 
 log "Loading Momentum Bets Grafana config from ${REPO}@${REF}:${SOURCE_PATH}"
+
+if [ "${MB_STACK_GRAFANA_CLEAN_LEGACY_PLUGINS:-true}" = "true" ] && [ -d "$PLUGIN_DIR" ]; then
+  # These legacy Angular plugins are persisted on the Railway volume from older
+  # deploys. Grafana 12+ refuses to initialize them even after the install env
+  # var is removed, so clear them before Grafana scans the plugin directory.
+  rm -rf \
+    "$PLUGIN_DIR/grafana-worldmap-panel" \
+    "$PLUGIN_DIR/grafana-piechart-panel" \
+    "$PLUGIN_DIR/grafana-simple-json-datasource" \
+    "$PLUGIN_DIR/grafana-clock-panel"
+  log "Removed legacy Grafana plugins from ${PLUGIN_DIR}"
+fi
 
 ZIP_FILE="$TMP_DIR/repo.zip"
 API_URL="https://api.github.com/repos/${REPO}/zipball/${REF}"
@@ -89,6 +102,18 @@ if [ -d "$SRC/dashboards" ]; then
   rm -rf "$DASH_DEST"
   mkdir -p "$DASH_DEST"
   cp -R "$SRC/dashboards/." "$DASH_DEST/"
+  if [ "${MB_STACK_GRAFANA_FLATTEN_GENERAL_FOLDER:-true}" = "true" ] && [ -d "$DASH_DEST/live/General" ]; then
+    # Grafana treats "General" as the built-in root folder. With
+    # foldersFromFilesStructure enabled, a literal live/General directory makes
+    # Grafana 13 try to create a managed folder named General and fail with:
+    # "A folder with that name already exists". Keep those dashboards in root.
+    for dashboard in "$DASH_DEST"/live/General/*; do
+      [ -e "$dashboard" ] || continue
+      mv "$dashboard" "$DASH_DEST/live/"
+    done
+    rmdir "$DASH_DEST/live/General" 2>/dev/null || true
+    log "Flattened ${SOURCE_PATH}/dashboards/live/General into the root dashboard folder"
+  fi
   log "Copied dashboards from ${SOURCE_PATH}/dashboards to ${DASH_DEST}"
 else
   fail_or_warn "${SOURCE_PATH}/dashboards is missing"
@@ -101,11 +126,20 @@ else
   fail_or_warn "${SOURCE_PATH}/provisioning/dashboards is missing"
 fi
 
+rm -rf "$ALERT_PROV_DEST"
+mkdir -p "$ALERT_PROV_DEST"
 if [ -d "$SRC/provisioning/alerting" ]; then
-  cp -R "$SRC/provisioning/alerting/." "$ALERT_PROV_DEST/"
-  log "Copied alert provisioning files to ${ALERT_PROV_DEST}"
+  if python3 /usr/local/bin/validate-mb-stack-grafana-alerting.py "$SRC/provisioning/alerting"; then
+    cp -R "$SRC/provisioning/alerting/." "$ALERT_PROV_DEST/"
+    log "Copied validated alert provisioning files to ${ALERT_PROV_DEST}"
+  else
+    # Invalid file provisioning can make Grafana abort its whole startup. Keep the
+    # destination empty so dashboards, datasource health, and deployment logs stay
+    # available while the bad GitOps bundle is corrected.
+    log "ERROR: GitOps alert provisioning validation failed; starting Grafana without GitOps alert rules"
+  fi
 else
-  fail_or_warn "${SOURCE_PATH}/provisioning/alerting is missing"
+  log "WARN: ${SOURCE_PATH}/provisioning/alerting is missing; starting Grafana without GitOps alert rules"
 fi
 
 log "Momentum Bets Grafana GitOps config load complete"
