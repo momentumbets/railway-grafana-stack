@@ -126,11 +126,20 @@ else
   fail_or_warn "${SOURCE_PATH}/provisioning/dashboards is missing"
 fi
 
+rm -rf "$ALERT_PROV_DEST"
+mkdir -p "$ALERT_PROV_DEST"
 if [ -d "$SRC/provisioning/alerting" ]; then
-  cp -R "$SRC/provisioning/alerting/." "$ALERT_PROV_DEST/"
-  log "Copied alert provisioning files to ${ALERT_PROV_DEST}"
+  if python3 /usr/local/bin/validate-mb-stack-grafana-alerting.py "$SRC/provisioning/alerting"; then
+    cp -R "$SRC/provisioning/alerting/." "$ALERT_PROV_DEST/"
+    log "Copied validated alert provisioning files to ${ALERT_PROV_DEST}"
+  else
+    # Invalid file provisioning can make Grafana abort its whole startup. Keep the
+    # destination empty so dashboards, datasource health, and deployment logs stay
+    # available while the bad GitOps bundle is corrected.
+    log "ERROR: GitOps alert provisioning validation failed; starting Grafana without GitOps alert rules"
+  fi
 else
-  fail_or_warn "${SOURCE_PATH}/provisioning/alerting is missing"
+  log "WARN: ${SOURCE_PATH}/provisioning/alerting is missing; starting Grafana without GitOps alert rules"
 fi
 
 log "Momentum Bets Grafana GitOps config load complete"
