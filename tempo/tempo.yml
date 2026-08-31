@@ -49,6 +49,14 @@ memberlist:
 querier:
   max_concurrent_queries: 20
 
+# Split TraceQL metrics queries between persisted blocks and the live generator.
+# Tempo 2.7.2 otherwise sends the latest 30m to local-blocks, which exceeds our
+# bounded local retention and makes Grafana's default 30m Drilldown query fail.
+query_frontend:
+  metrics:
+    query_backend_after: 15m
+    max_duration: 3h
+
 # Metrics generator - generates RED metrics from spans
 metrics_generator:
   registry:
@@ -76,7 +84,7 @@ metrics_generator:
       max_live_traces: 20000
       max_block_duration: 1m
       max_block_bytes: 50000000
-      complete_block_timeout: 15m
+      complete_block_timeout: 20m
 
     service_graphs:
       histogram_buckets: [0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4, 12.8]
