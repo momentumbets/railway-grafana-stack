@@ -146,16 +146,24 @@ prometheus.scrape "odds_ingestion" {
 	bearer_token    = sys.env("ADMIN_ACCESS_TOKEN")
 }
 
+// Railway private DNS returns one AAAA record per active replica. Discover and
+// scrape every worker directly so process gauges and counters never alternate
+// between four replicas behind one static service target.
+discovery.dns "odds_ingestion_workers" {
+	names            = ["odds-ingestion-worker.railway.internal"]
+	type             = "AAAA"
+	port             = 3005
+	refresh_interval = "30s"
+}
+
 prometheus.scrape "odds_ingestion_worker_1" {
-	targets = [{
-		__address__ = "odds-ingestion-worker.railway.internal:3005",
-	}]
-	forward_to      = [prometheus.relabel.filter_metrics.receiver]
-	job_name        = "odds_ingestion_worker_1"
-	scrape_interval = "60s"
-	scrape_timeout  = "60s"
-	metrics_path    = "/v1/metrics"
-	bearer_token    = sys.env("ADMIN_ACCESS_TOKEN")
+	targets          = discovery.dns.odds_ingestion_workers.targets
+	forward_to       = [prometheus.relabel.filter_metrics.receiver]
+	job_name         = "odds_ingestion_worker_1"
+	scrape_interval  = "60s"
+	scrape_timeout   = "60s"
+	metrics_path     = "/v1/metrics"
+	bearer_token     = sys.env("ADMIN_ACCESS_TOKEN")
 }
 
 prometheus.scrape "criteria_evaluator" {
