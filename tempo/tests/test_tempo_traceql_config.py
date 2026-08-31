@@ -16,9 +16,17 @@ class TempoTraceqlConfigTests(unittest.TestCase):
         self.assertIn("      max_live_traces: 20000", self.config)
         self.assertNotIn("max_live_traces_bytes", self.config)
         self.assertIn("      max_block_bytes: 50000000", self.config)
-        self.assertIn("      complete_block_timeout: 15m", self.config)
+        self.assertIn("      complete_block_timeout: 20m", self.config)
         self.assertIn("      flush_to_storage: true", self.config)
         self.assertIn("  traces_storage:\n    path: /var/tempo/generator/traces", self.config)
+
+    def test_live_generator_window_fits_inside_local_block_retention(self) -> None:
+        self.assertIn(
+            "query_frontend:\n  metrics:\n    query_backend_after: 15m",
+            self.config,
+        )
+        self.assertIn("    max_duration: 3h", self.config)
+        self.assertIn("      complete_block_timeout: 20m", self.config)
 
 if __name__ == "__main__":
     unittest.main()
