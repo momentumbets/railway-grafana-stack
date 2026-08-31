@@ -64,7 +64,21 @@ metrics_generator:
       - url: http://prometheus.railway.internal:9090/api/v1/write
         send_exemplars: true
 
+  # Traces Drilldown uses TraceQL metrics, which require local-blocks. Keep the
+  # processor bounded and flush completed blocks to the persisted Tempo volume
+  # so enabling Drilldown does not recreate the previous memory staircase.
+  traces_storage:
+    path: /var/tempo/generator/traces
+
   processor:
+    local_blocks:
+      filter_server_spans: false
+      flush_to_storage: true
+      max_live_traces_bytes: 100000000 # 100MB live-trace memory ceiling
+      max_block_duration: 1m
+      max_block_bytes: 50000000 # 50MB completed-block ceiling
+      complete_block_timeout: 15m
+
     service_graphs:
       histogram_buckets: [0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4, 12.8]
       dimensions:
@@ -97,7 +111,7 @@ metrics_generator:
 overrides:
   defaults:
     metrics_generator:
-      processors: ["span-metrics", "service-graphs"]
+      processors: ["span-metrics", "service-graphs", "local-blocks"]
 
 usage_report:
   reporting_enabled: false
