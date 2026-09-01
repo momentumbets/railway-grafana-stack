@@ -1,0 +1,12 @@
+FROM grafana/alloy:v1.19.2
+
+COPY config.alloy /etc/alloy/config.alloy
+
+# Public browser collector. Railway's domain targets this port.
+EXPOSE 12345
+# Private Alloy admin/metrics endpoint.
+EXPOSE 12346
+
+CMD ["run", "--server.http.listen-addr=0.0.0.0:12346", \
+     "--storage.path=/var/lib/alloy/data", \
+     "/etc/alloy/config.alloy"]

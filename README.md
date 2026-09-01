@@ -138,6 +138,46 @@ Another thing to note is that the ingest API endpoint for the HTTP server is `/v
 
 **Grafana Alloy**: If you run Grafana Alloy (e.g. `grafana-alloy/config.alloy`) to forward OTLP traces to Tempo, set `TEMPO_OTLP_INTERNAL_URL` to the OTLP ingest URL (e.g. `${{Tempo.INTERNAL_HTTP_INGEST}}` or `http://tempo:4318`). Do not use `TEMPO_INTERNAL_URL` for trace export—that is the query API (port 3200); ingest is on port 4318.
 
+### Self-hosted Grafana Faro frontend observability
+
+The dedicated `faro-alloy` Railway service accepts browser telemetry at
+`/collect` on public port `12345`. It is intentionally separate from the
+primary Grafana Alloy scraper so deploying or rolling back Faro can never
+expose or disrupt the primary Alloy admin endpoint.
+
+Required `faro-alloy` variables:
+
+```text
+FARO_API_KEY=<random browser admission token>
+LOKI_INTERNAL_URL=http://loki.railway.internal:3100
+PROMETHEUS_INTERNAL_URL=http://prometheus.railway.internal:9090
+TEMPO_OTLP_INTERNAL_URL=http://tempo.railway.internal:4318
+```
+
+Configure the web application with:
+
+```text
+NEXT_PUBLIC_FARO_URL=https://<faro-alloy-public-domain>/collect
+NEXT_PUBLIC_FARO_API_KEY=<same admission token>
+NEXT_PUBLIC_FARO_APP_NAME=mb-client
+NEXT_PUBLIC_FARO_APP_NAMESPACE=momentum-bets
+```
+
+The browser token is an admission capability, not a durable secret: users can
+recover it from the client bundle. It reduces blind and opportunistic abuse,
+while the deployment-wide rate limit provides the actual bounded-ingestion
+control. Keep the exact CORS allowlist and global rate limit in place.
+
+Faro logfmt fields `app_name`, `app_environment`, and `app_namespace` are
+normalized to the bounded Loki labels `app`, `environment`, and `namespace` so
+the provisioned frontend dashboard can query `{app="mb-client"}`. Browser
+traces flow to Tempo, while the receiver's own `faro_receiver_*` metrics are
+self-scraped through private admin port `12346` and remote-written to
+Prometheus.
+
+Rollback the Faro service independently or unset `NEXT_PUBLIC_FARO_URL`; neither
+operation changes the primary Grafana Alloy service.
+
 ### Using otherwise standard observability tooling
 
 To send data from your other Railway applications to this observability stack:
