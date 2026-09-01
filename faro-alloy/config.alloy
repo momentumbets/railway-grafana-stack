@@ -1,0 +1,130 @@
+// Dedicated public Grafana Faro receiver. Keep this isolated from the primary
+// Alloy scraper so rollback cannot expose Alloy's admin server.
+loki.process "faro" {
+  forward_to = [loki.relabel.faro.receiver]
+
+  stage.logfmt {
+    mapping = {
+      "app_environment" = "",
+      "app_name"        = "",
+      "app_namespace"   = "",
+      "kind"            = "",
+    }
+  }
+
+  stage.labels {
+    values = {
+      "app_environment" = "",
+      "app_name"        = "",
+      "app_namespace"   = "",
+      "kind"            = "",
+    }
+  }
+}
+
+loki.relabel "faro" {
+  forward_to = [loki.write.selfhosted.receiver]
+
+  rule {
+    source_labels = ["app_name"]
+    target_label  = "app"
+  }
+
+  rule {
+    source_labels = ["app_environment"]
+    target_label  = "environment"
+  }
+
+  rule {
+    source_labels = ["app_namespace"]
+    target_label  = "namespace"
+  }
+
+  rule {
+    action = "labeldrop"
+    regex  = "app_name|app_environment|app_namespace"
+  }
+}
+
+faro.receiver "frontend" {
+  server {
+    listen_address           = "0.0.0.0"
+    listen_port              = 12345
+    api_key                  = sys.env("FARO_API_KEY")
+    max_allowed_payload_size = "5MiB"
+    cors_allowed_origins = [
+      "https://app.momentumbets.com",
+      "https://momentumbets.com",
+      "https://www.momentumbets.com",
+    ]
+
+    // A deployment-wide bucket prevents clients from evading limits by
+    // rotating attacker-controlled app metadata.
+    rate_limiting {
+      enabled    = true
+      strategy   = "global"
+      rate       = 50
+      burst_size = 100
+    }
+  }
+
+  sourcemaps {
+    download = true
+    download_from_origins = [
+      "https://app.momentumbets.com",
+      "https://momentumbets.com",
+      "https://www.momentumbets.com",
+    ]
+  }
+
+  output {
+    logs   = [loki.process.faro.receiver]
+    traces = [otelcol.processor.batch.traces.input]
+  }
+}
+
+otelcol.processor.batch "traces" {
+  output {
+    traces = [otelcol.exporter.otlphttp.tempo.input]
+  }
+}
+
+otelcol.exporter.otlphttp "tempo" {
+  client {
+    endpoint = sys.env("TEMPO_OTLP_INTERNAL_URL")
+    tls {
+      insecure = true
+    }
+  }
+}
+
+loki.write "selfhosted" {
+  endpoint {
+    url = sys.env("LOKI_INTERNAL_URL") + "/loki/api/v1/push"
+  }
+}
+
+// Export receiver health/rate-limit/source-map metrics to the existing
+// Prometheus service without exposing this admin endpoint publicly.
+prometheus.scrape "faro_alloy" {
+  targets = [{
+    __address__ = "localhost:12346",
+  }]
+  forward_to      = [prometheus.remote_write.selfhosted.receiver]
+  job_name        = "faro-alloy"
+  scrape_interval = "60s"
+  scrape_timeout  = "10s"
+  metrics_path    = "/metrics"
+}
+
+prometheus.remote_write "selfhosted" {
+  external_labels = {
+    monitor = "railway-faro",
+  }
+
+  endpoint {
+    url = sys.env("PROMETHEUS_INTERNAL_URL") + "/api/v1/write"
+    queue_config { }
+    metadata_config { }
+  }
+}
