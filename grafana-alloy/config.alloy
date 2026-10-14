@@ -1,4 +1,23 @@
 
+// V5 uses private AAAA discovery: one metrics target per replica.
+// Worker must listen on IPv6 runtime PORT 8080. Capture remains disabled.
+discovery.dns "v5_shadow_shard_0" {
+  names = ["v5-shadow-worker-shard-0.railway.internal"]
+  type = "AAAA"
+  port = 8080
+  refresh_interval = "30s"
+}
+
+prometheus.scrape "v5_shadow_shard_0" {
+  targets = discovery.dns.v5_shadow_shard_0.targets
+  forward_to = [prometheus.relabel.filter_metrics.receiver]
+  job_name = "v5-shadow-worker-shard-0"
+  metrics_path = "/metrics"
+  scrape_interval = "60s"
+  scrape_timeout = "10s"
+  sample_limit = 500
+}
+
 otelcol.receiver.otlp "default" {
   grpc {
     endpoint = "0.0.0.0:4317"
