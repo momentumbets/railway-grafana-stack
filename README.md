@@ -122,6 +122,24 @@ The Grafana image downloads a Momentum Bets Grafana GitOps bundle before Grafana
 
 For private repo access, set `MB_STACK_GRAFANA_CONFIG_TOKEN` or `GITHUB_TOKEN` on the Grafana Railway service. During review/testing you can point `MB_STACK_GRAFANA_CONFIG_REF` at a PR branch; for production, keep it on `main` after the mb-stack Grafana data PR merges.
 
+`MB_STACK_GRAFANA_CONFIG_TOKEN` should be a fine-grained token owned by the `momentumbets` organization with **Contents: read-only** on `momentumbets/mb-stack` only. With `MB_STACK_GRAFANA_CONFIG_REQUIRED=true`, an expired token stops Grafana from starting, so rotate it before it expires.
+
+### Momentum Bets Postgres datasource login
+
+The `MomentumBets Postgres` datasource logs in with a dedicated, least-privilege, read-only role (`mb_grafana`), not the shared reporting role. Set on the Grafana service:
+
+```text
+GRAFANA_PG_USER=mb_grafana
+GRAFANA_PG_PASSWORD=<mb_grafana password>
+POSTGRES_INTERNAL_URL=${{Timescale.PGHOST}}
+```
+
+The role has a connection limit of 10, so the datasource pool is capped at 8 open connections. When a new dashboard needs a table the role cannot read, grant `SELECT` on that table to `mb_grafana` rather than switching Grafana to a broader login.
+
+### Railway watch paths
+
+Every service deployed from this repo needs a watch path, so unrelated changes don't rebuild it: `/grafana/**`, `grafana-alloy/**`, `/loki/**`, `/prometheus/**`, `/tempo/**` and `/faro-alloy/**` (Faro Alloy → Settings → Watch Paths).
+
 ## Connecting Your Applications
 
 ### Using [Locomotive](https://railway.com/template/jP9r-f) for Loki

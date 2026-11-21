@@ -94,16 +94,18 @@ datasources:
   - name: MomentumBets Postgres
     type: postgres
     url: $POSTGRES_INTERNAL_URL
-    user: mb_reporting
+    # Dedicated least-privilege, read-only login for Grafana (Railway vars on the Grafana service).
+    user: $GRAFANA_PG_USER
     isDefault: false
     secureJsonData:
-      password: $REPORTING_PG_PASSWORD
+      password: $GRAFANA_PG_PASSWORD
     jsonData:
       database: postgres
       sslmode: "disable" # disable/require/verify-ca/verify-full
-      maxOpenConns: 100
-      maxIdleConns: 100
-      maxIdleConnsAuto: true
+      # Keep the pool under the role's CONNECTION LIMIT (10).
+      maxOpenConns: 8
+      maxIdleConns: 4
+      maxIdleConnsAuto: false
       connMaxLifetime: 14400
       postgresVersion: 903 # 903=9.3, 904=9.4, 905=9.5, 906=9.6, 1000=10
       timescaledb: true
